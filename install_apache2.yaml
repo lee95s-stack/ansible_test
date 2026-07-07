@@ -4,35 +4,20 @@
   become: true
   tasks:
 
-  - name: update repository index
-    dnf:
-      update_cache: yes
-    when: ansible_distribution == "RedHat"
-
-  - name: install apache2 package
-    dnf:
-      name: httpd
-      state: latest
-    when: ansible_distribution == "RedHat"
-
-  - name: add php support for apache
-    dnf:
-      name: php
-      state: latest
-    when: ansible_distribution == "RedHat"
-
-  - name: update repository index
-    command: zypper refresh
-    when: ansible_distribution == "SLES_SAP"
-
-  - name: install apache2 package
+  - name: install apache and php for SLES for SAP servers
     zypper:
-      name: apache2
+      name: 
+        - apache2
+        - php8
       state: latest
+      update_cache: true
     when: ansible_distribution == "SLES_SAP"
 
-  - name: add php support for apache
-    zypper:
-      name: php8
+  - name: install apache and php for RHEL servers
+    dnf:
+      name: 
+        - httpd
+        - php
       state: latest
-    when: ansible_distribution == "SLES_SAP"
+      update_cache: true
+    when: ansible_distribution == "RedHat"

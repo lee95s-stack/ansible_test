@@ -1,0 +1,62 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (Ubuntu)
+    apt:
+      #upgrade: dist
+      upgrade: no
+      update_cache: true
+      cache_valid_time: 3600  # 💡 1시간 이내에 업데이트된 캐시가 있다면 재사용하여 속도 향상
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install updates (SELS for SAP)
+    package:
+      name: "*"
+      update_cache: true
+    when: ansible_distribution == "SLES_SAP"
+
+  - name: install updates (RHEL)
+    dnf:
+      update_only: true
+      update_cache: true
+    when: ansible_distribution == "RedHat"
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache and php for Ubuntu servers
+    apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariadb package (SLES_SAP)
+    zypper:
+      name: mariadb
+      state: latest
+    when: ansible_distribution == "SLES_SAP"
+
+  - name: install mariadb package (RHEL)
+    dnf:
+      name: mariadb
+      state: latest
+    when: ansible_distribution == "RedHat"
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: install samba package
+    package:
+      name: samba
+      state: latest
